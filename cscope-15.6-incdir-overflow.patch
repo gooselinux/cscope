@@ -1,0 +1,99 @@
+diff -pruN cscope-15.6.orig/src/dir.c cscope-15.6/src/dir.c
+--- cscope-15.6.orig/src/dir.c	2006-09-30 10:13:00.000000000 +0200
++++ cscope-15.6/src/dir.c	2009-06-12 16:56:33.000000000 +0200
+@@ -129,7 +129,6 @@ sourcedir(char *dirlist)
+     /* parse the directory list */
+     dir = strtok(dirlist, DIRSEPS);
+     while (dir != NULL) {
+-	int dir_len = strlen(dir);
+ 
+ 	addsrcdir(dir);
+ 
+@@ -139,8 +138,7 @@ sourcedir(char *dirlist)
+ 			
+ 	    /* compute its path from higher view path source dirs */
+ 	    for (i = 1; i < nvpsrcdirs; ++i) {
+-		sprintf(path, "%.*s/%s",
+-			PATHLEN - 2 - dir_len,
++		snprintf(path, PATHLEN, "%s/%s",
+ 			srcdirs[i], dir);
+ 		addsrcdir(path);
+ 	    }
+@@ -197,7 +195,6 @@ includedir(char *dirlist)
+     /* parse the directory list */
+     dir = strtok(dirlist, DIRSEPS);
+     while (dir != NULL) {
+-	size_t dir_len = strlen(dir);
+ 
+ 	addincdir(dir, dir);
+ 
+@@ -207,8 +204,7 @@ includedir(char *dirlist)
+ 			
+ 	    /* compute its path from higher view path source dirs */
+ 	    for (i = 1; i < nvpsrcdirs; ++i) {
+-		sprintf(path, "%.*s/%s", 
+-			PATHLEN - 2 - dir_len,
++		snprintf(path, PATHLEN, "%s/%s", 
+ 			srcdirs[i], dir);
+ 		addincdir(dir, path);
+ 	    }
+@@ -480,9 +476,6 @@ static void
+ scan_dir(const char *adir, BOOL recurse_dir)
+ {
+ 	DIR	*dirfile;
+-	int adir_len = strlen(adir);
+-
+-	/* FIXME: no guards against adir_len > PATHLEN, yet */
+ 
+ 	if ((dirfile = opendir(adir)) != NULL) {
+ 		struct dirent *entry;
+@@ -494,8 +487,7 @@ scan_dir(const char *adir, BOOL recurse_
+ 			    && (strcmp("..",entry->d_name) != 0)) {
+ 				struct stat buf;
+ 
+-				sprintf(path,"%s/%.*s", adir,
+-					PATHLEN - 2 - adir_len,
++				snprintf(path, PATHLEN, "%s/%s", adir,
+ 					entry->d_name);
+ 
+ 				if (lstat(path,&buf) == 0) {
+@@ -599,20 +591,19 @@ incfile(char *file, char *type)
+     if (type[0] == '"' && (s = inviewpath(file)) != NULL) {
+ 	addsrcfile(s);
+     } else {
+-	size_t file_len = strlen(file);
+ 
+ 	/* search for the file in the #include directory list */
+ 	for (i = 0; i < nincdirs; ++i) {
+ 	    /* don't include the file from two directories */
+-	    sprintf(name, "%.*s/%s",
+-		    PATHLEN - 2 - file_len, incnames[i],
++	    snprintf(name, PATHLEN, "%s/%s",
++		    incnames[i],
+ 		    file);
+ 	    if (infilelist(name) == YES) {
+ 		break;
+ 	    }
+ 	    /* make sure it exists and is readable */
+-	    sprintf(path, "%.*s/%s",
+-		    PATHLEN - 2 - file_len, incdirs[i],
++	    snprintf(path, PATHLEN, "%s/%s",
++		    incdirs[i],
+ 		    file);
+ 	    if (access(compath(path), READ) == 0) {
+ 		addsrcfile(path);
+@@ -655,12 +646,11 @@ inviewpath(char *file)
+     /* if it isn't a full path name and there is a multi-directory
+      * view path */
+     if (*file != '/' && vpndirs > 1) {
+-	int file_len = strlen(file);
+ 
+ 	/* compute its path from higher view path source dirs */
+ 	for (i = 1; i < nvpsrcdirs; ++i) {
+-	    sprintf(path, "%.*s/%s",
+-		    PATHLEN - 2 - file_len, srcdirs[i],
++	    snprintf(path, PATHLEN, "%s/%s",
++		    srcdirs[i],
+ 		    file);
+ 	    if (access(compath(path), READ) == 0) {
+ 		return(path);

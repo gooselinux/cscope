@@ -1,0 +1,30 @@
+--- cscope-15.6/src/main.c.orig	2007-05-25 10:11:02.000000000 -0400
++++ cscope-15.6/src/main.c	2007-05-25 10:12:43.000000000 -0400
+@@ -153,12 +153,7 @@
+     yyout = stdout;
+     /* save the command name for messages */
+     argv0 = argv[0];
+-#if defined(KEY_RESIZE) && !defined(__DJGPP__)
+-    winch_action.sa_sigaction = sigwinch_handler;
+-    sigemptyset(&winch_action.sa_mask);
+-    winch_action.sa_flags = SA_SIGINFO;
+-    sigaction(SIGWINCH,&winch_action,NULL);
+-#endif
++
+     /* set the options */
+     while (--argc > 0 && (*++argv)[0] == '-') {
+ 	/* HBB 20030814: add GNU-style --help and --version options */
+@@ -400,6 +395,13 @@
+     }
+ 
+     if (linemode == NO) {
++	
++#if defined(KEY_RESIZE) && !defined(__DJGPP__)
++	winch_action.sa_sigaction = sigwinch_handler;
++	sigemptyset(&winch_action.sa_mask);
++	winch_action.sa_flags = SA_SIGINFO;
++	sigaction(SIGWINCH,&winch_action,NULL);
++#endif
+ 	signal(SIGINT, SIG_IGN);	/* ignore interrupts */
+ 	signal(SIGPIPE, SIG_IGN);/* | command can cause pipe signal */
+ 
